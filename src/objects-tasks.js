@@ -34,7 +34,7 @@ function shallowCopy(obj) {
  *    mergeObjects([]) => {}
  */
 function mergeObjects(objects) {
-  let entries = objects.flatMap((obj) => Object.entries(obj));
+  const entries = objects.flatMap((obj) => Object.entries(obj));
   const result = {};
   entries.forEach(([key, value]) => {
     if (!result[key]) {
@@ -61,8 +61,9 @@ function mergeObjects(objects) {
  *
  */
 function removeProperties(obj, keys) {
-  keys.forEach((key)=> delete obj[key])
-  return obj
+  const objLink = obj;
+  keys.forEach((key) => delete objLink[key]);
+  return objLink;
 }
 
 /**
@@ -77,8 +78,13 @@ function removeProperties(obj, keys) {
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 2}) => true
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 3}) => false
  */
-function compareObjects(/* obj1, obj2 */) {
-  throw new Error('Not implemented');
+function compareObjects(obj1, obj2) {
+  const obj1Entries = Object.entries(obj1);
+  const obj2Entries = Object.entries(obj2);
+  if (obj1Entries.length !== obj2Entries.length) {
+    return false;
+  }
+  return obj1Entries.every(([key, value]) => obj2[key] === value);
 }
 
 /**
@@ -92,8 +98,8 @@ function compareObjects(/* obj1, obj2 */) {
  *    isEmptyObject({}) => true
  *    isEmptyObject({a: 1}) => false
  */
-function isEmptyObject(/* obj */) {
-  throw new Error('Not implemented');
+function isEmptyObject(obj) {
+  return Object.keys(obj).length === 0;
 }
 
 /**
@@ -112,8 +118,8 @@ function isEmptyObject(/* obj */) {
  *    immutableObj.newProp = 'new';
  *    console.log(immutableObj) => {a: 1, b: 2}
  */
-function makeImmutable(/* obj */) {
-  throw new Error('Not implemented');
+function makeImmutable(obj) {
+  return Object.freeze(obj);
 }
 
 /**
@@ -126,8 +132,14 @@ function makeImmutable(/* obj */) {
  *    makeWord({ a: [0, 1], b: [2, 3], c: [4, 5] }) => 'aabbcc'
  *    makeWord({ H:[0], e: [1], l: [2, 3, 8], o: [4, 6], W:[5], r:[7], d:[9]}) => 'HelloWorld'
  */
-function makeWord(/* lettersObject */) {
-  throw new Error('Not implemented');
+function makeWord(lettersObject) {
+  const stringArr = [];
+  Object.keys(lettersObject).forEach((key) =>
+    lettersObject[key].forEach((index) => {
+      stringArr[index] = key;
+    })
+  );
+  return stringArr.join('');
 }
 
 /**
