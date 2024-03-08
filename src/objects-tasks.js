@@ -371,33 +371,162 @@ function group(array, keySelector, valueSelector) {
  *  For more examples see unit tests.
  */
 
+class BaseComponent {
+  elementStr = '';
+
+  hasId = false;
+
+  hasPseudoElement = false;
+
+  hasElement = false;
+
+  hasPseudoClass = false;
+
+  hasAtr = false;
+
+  hasClass = false;
+
+  constructor(value) {
+    this.elementStr = value;
+  }
+
+  element(value) {
+    if (this.hasElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    if (
+      this.hasId ||
+      this.hasClass ||
+      this.hasAtr ||
+      this.hasPseudoClass ||
+      this.hasPseudoElement
+    ) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    this.elementStr += value;
+    this.hasElement = true;
+    return this;
+  }
+
+  id(value) {
+    if (this.hasId) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    if (
+      this.hasClass ||
+      this.hasAtr ||
+      this.hasPseudoClass ||
+      this.hasPseudoElement
+    ) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    this.elementStr += `#${value}`;
+    this.hasId = true;
+    return this;
+  }
+
+  class(value) {
+    if (this.hasAtr || this.hasPseudoClass || this.hasPseudoElement) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    this.hasClass = true;
+    this.elementStr += `.${value}`;
+    return this;
+  }
+
+  attr(value) {
+    if (this.hasPseudoClass || this.hasPseudoElement) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    this.hasAtr = true;
+    this.elementStr += `[${value}]`;
+    return this;
+  }
+
+  pseudoClass(value) {
+    if (this.hasPseudoElement) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    this.hasPseudoClass = true;
+    this.elementStr += `:${value}`;
+    return this;
+  }
+
+  pseudoElement(value) {
+    if (this.hasPseudoElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    this.elementStr += `::${value}`;
+    this.hasPseudoElement = true;
+    return this;
+  }
+
+  stringify() {
+    return this.elementStr;
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  combinedSelector: '',
+  element: (value) => {
+    const newElement = new BaseComponent(value);
+    newElement.hasElement = true;
+    return newElement;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const newElement = new BaseComponent(`#${value}`);
+    newElement.hasId = true;
+    return newElement;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const newElement = new BaseComponent(`.${value}`);
+    newElement.hasClass = true;
+    return newElement;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const newElement = new BaseComponent(`[${value}]`);
+    newElement.hasAtr = true;
+    return newElement;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const newElement = new BaseComponent(`:${value}`);
+    newElement.hasPseudoClass = true;
+    return newElement;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const newElement = new BaseComponent(`::${value}`);
+    newElement.hasPseudoElement = true;
+    return newElement;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    this.combinedSelector = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return this;
+  },
+
+  stringify() {
+    return this.combinedSelector;
   },
 };
 
